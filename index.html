@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Robotics PMS - TV Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin:0; height:100%; background:#000; overflow:hidden; }
+  iframe { position:absolute; inset:0; width:100%; height:100%; border:0;
+           opacity:0; transition:opacity 1s ease; background:#fff; }
+  iframe.active { opacity:1; }
+</style>
+</head>
+<body>
+<iframe id="f0"></iframe>
+<iframe id="f1"></iframe>
+
+<script>
+  // ---- SETTINGS ----
+  const SECONDS_PER_SCREEN = 30;   // how long each dashboard stays on screen
+  const urls = [
+    // TV Dashboard
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJkkWOzbmHGwav0Rn6qmTEpEDa77bj_k2Vgknb67a33lyuf7LCb49XrcihhLGNmjAtzwmcm79j4tjN/pubhtml?gid=1452117258&single=true&widget=false&headers=false",
+    // TV Dashboard 2
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vRJkkWOzbmHGwav0Rn6qmTEpEDa77bj_k2Vgknb67a33lyuf7LCb49XrcihhLGNmjAtzwmcm79j4tjN/pubhtml?gid=768817373&single=true&widget=false&headers=false"
+  ];
+  // ------------------
+
+  const frames = [document.getElementById("f0"), document.getElementById("f1")];
+  let current = 0;
+
+  // Reload the sheet each time it is about to be shown, so data is always fresh.
+  function load(i) {
+    frames[i].src = urls[i] + "&_t=" + Date.now();
+  }
+
+  load(0);
+  load(1);
+  frames[0].classList.add("active");
+
+  setInterval(() => {
+    const next = (current + 1) % urls.length;
+    frames[next].classList.add("active");
+    frames[current].classList.remove("active");
+    const old = current;
+    current = next;
+    // refresh the screen that just went out of view, ready for its next turn
+    setTimeout(() => load(old), 1500);
+  }, SECONDS_PER_SCREEN * 1000);
+
+  // Safety net: full page reload every 2 hours in case the TV browser freezes.
+  setTimeout(() => location.reload(), 2 * 60 * 60 * 1000);
+</script>
+</body>
+</html>
